@@ -19,12 +19,12 @@ public class PlayerController : MonoBehaviour
     private PlayerState state;
     private Vector2 moveInput;
 
-    // 当前能否行动：没被定住，并且回合正在进行。测试场景里没有 RoundManager 时视为进行中。
+    // 当前能否行动：没被定住、背包没打开，并且回合正在进行。测试场景里没有 RoundManager 时视为进行中。
     public bool CanAct
     {
         get
         {
-            if (state.IsFrozen) return false;
+            if (state.IsFrozen || BackpackUI.IsOpen) return false;
             RoundManager round = RoundManager.Instance;
             return round == null || round.State == RoundManager.RoundState.Playing;
         }
