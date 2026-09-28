@@ -1,19 +1,43 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-// 生成地上的物品。场景里放一个。
-// 第 1 步只有外壳：调用不会报错，但还不会生成物品（第 3 步补全）。
+// 生成地上的物品。场景里放一个，并在 Inspector 里设置 World Item Prefab。
 public class ItemFactory : MonoBehaviour
 {
-    public static WorldItem Spawn(ItemData item, Vector2 position)
+    [SerializeField] private WorldItem worldItemPrefab;
+
+    private static ItemFactory instance;
+
+    private void Awake()
     {
-        Debug.LogWarning("[ItemFactory] 还没实现（A 第 3 步），这次不会生成物品。");
-        return null;
+        if (instance != null && instance != this)
+        {
+            Debug.LogWarning("[ItemFactory] 场景里有多个 ItemFactory，只会使用第一个。");
+            return;
+        }
+
+        instance = this;
     }
 
-    // 把多件物品散落在 center 周围，自动避开墙和其他实心物体。
-    public static void Burst(IEnumerable<ItemData> items, Vector2 center)
+    private void OnDestroy()
     {
-        Debug.LogWarning("[ItemFactory] 还没实现（A 第 3 步），这次不会生成物品。");
+        if (instance == this) instance = null;
+    }
+
+    // 在 position 生成一件物品。
+    public static WorldItem Spawn(ItemData item, Vector2 position)
+    {
+        if (item == null || !IsReady()) return null;
+
+        WorldItem worldItem = Instantiate(instance.worldItemPrefab, position, Quaternion.identity, instance.transform);
+        worldItem.Init(item);
+        return worldItem;
+    }
+
+    private static bool IsReady()
+    {
+        if (instance != null && instance.worldItemPrefab != null) return true;
+
+        Debug.LogWarning("[ItemFactory] 场景里需要一个 ItemFactory，并设置好 World Item Prefab。");
+        return false;
     }
 }

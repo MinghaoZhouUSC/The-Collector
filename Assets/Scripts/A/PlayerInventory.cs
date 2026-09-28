@@ -47,11 +47,7 @@ public class PlayerInventory : MonoBehaviour
         for (int i = 1; i < items.Count; i++)
             if (items[i].weight > items[heaviest].weight) heaviest = i;
 
-        ItemData dropped = items[heaviest];
-        items.RemoveAt(heaviest);
-        Recalculate();
-        ItemFactory.Spawn(dropped, transform.position);
-        Changed?.Invoke();
+        DropItem(heaviest);
     }
 
     // 已存价值 += 携带价值，清空背包（钥匙保留）。背包为空时什么都不做，可以每帧调用。
@@ -77,6 +73,21 @@ public class PlayerInventory : MonoBehaviour
 
     public float Capacity => capacity;
     public int BankedValue => bankedValue;
+
+    // 背包里的物品，按拾取顺序排列（不含钥匙）。
+    public IReadOnlyList<ItemData> Items => items;
+
+    // 把第 index 件丢在脚下，丢下的可以再捡。
+    public void DropItem(int index)
+    {
+        if (index < 0 || index >= items.Count) return;
+
+        ItemData dropped = items[index];
+        items.RemoveAt(index);
+        Recalculate();
+        ItemFactory.Spawn(dropped, transform.position);
+        Changed?.Invoke();
+    }
 
     public bool CanCarry(ItemData item)
     {
