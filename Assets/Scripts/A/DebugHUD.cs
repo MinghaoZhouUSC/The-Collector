@@ -69,14 +69,22 @@ public class DebugHUD : MonoBehaviour
         string frozen = state != null ? state.IsFrozen.ToString() : "-";
         string inSafeHouse = state != null ? state.IsInSafeHouse.ToString() : "-";
 
+        RoundManager round = RoundManager.Instance;
+        string roundLine = round == null
+            ? "Round     (no RoundManager)"
+            : $"Round     {round.State}   {round.TimeRemaining:0.0}s   target ${round.TargetValue}" +
+              (round.State == RoundManager.RoundState.Ended ? $"   Won {round.Won}   Score ${round.FinalScore}" : "");
+
         string text =
             $"Weight    {inventory.TotalWeight:0.#} / {inventory.Capacity:0.#}   (load {encumbrance.LoadRatio * 100f:0}%)\n" +
             $"Speed     {encumbrance.CurrentSpeed:0.00}   ({encumbrance.SpeedMultiplier * 100f:0}%)   {encumbrance.SpeedLabel}\n" +
             $"Velocity  {velocity:0.00}\n" +
             $"Carrying  ${inventory.TotalValue}    Banked ${inventory.BankedValue}    Key {(inventory.HasKey ? 1 : 0)}/1\n" +
             $"Frozen {frozen}    InSafeHouse {inSafeHouse}\n" +
+            roundLine + "\n" +
             "[+] add item   [-] drop heaviest   [0] deposit";
 
-        GUI.Label(new Rect(10f, 10f, 480f, 150f), text, style);
+        // 放在屏幕左侧中间，避开 HUD 四个角。
+        GUI.Label(new Rect(10f, Screen.height * 0.5f - 90f, 560f, 175f), text, style);
     }
 }
