@@ -762,8 +762,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90ab61e32233456792a29a5ac523fd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoundManager
-  roundSeconds: 30
-  targetValue: 50
+  roundSeconds: 120
+  targetValue: 500
   startKey: 1
   extractKey: 20
   restartKey: 32

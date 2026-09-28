@@ -120,7 +120,7 @@ public class GameHUD : MonoBehaviour
         shownHint = hint;
         hintText.color = hint == 0 ? Gold : HintColor;
         hintText.text = hint == HintNone ? ""
-            : hint == HintInteract ? "[E] Interact"
+            : hint == HintInteract ? "[E] Interact      [B] Backpack"
             : hint == 0 ? "Press F to extract"
             : $"Need ${hint} more to extract";
     }
