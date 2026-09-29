@@ -10,9 +10,17 @@ public class PlayerState : MonoBehaviour
     [Tooltip("玩家是否在安全屋区域内，由 B 的 SafeHouseZone 设置。测试时可以在 Inspector 里手动勾选。")]
     [SerializeField] private bool isInSafeHouse;
 
+    private float frozenUntil = float.NegativeInfinity;
+
+    public void Freeze(float seconds)
+    {
+        if (float.IsNaN(seconds) || float.IsInfinity(seconds) || seconds <= 0f) return;
+        frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
+    }
+
     public bool IsFrozen
     {
-        get => isFrozen;
+        get => isFrozen || Time.time < frozenUntil;
         set => isFrozen = value;
     }
 
