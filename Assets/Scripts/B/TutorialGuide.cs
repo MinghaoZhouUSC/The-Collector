@@ -9,15 +9,16 @@ public sealed class TutorialGuide : MonoBehaviour
     private PlayerInventory inventory;
     private PlayerState player;
     private Vector3 startPosition;
-    private bool initialized, moved, collected, inspected, banked;
+    private bool initialized, moved, collected, inspected, banked, mergedOnce;
     private string shown;
 
     private void Awake()
     {
         canvas = UIBuilder.CreateScreenCanvas("TutorialGuideCanvas", transform, 25);
-        var panel = UIBuilder.CreateImage(canvas.transform, "Guide", new Color(.035f, .075f, .10f, .96f));
+        var panel = UIBuilder.CreatePanel(canvas.transform, "Guide", new Color(.035f, .075f, .10f, .94f), 16f);
         UIBuilder.Place(panel.rectTransform, new Vector2(.5f, 1f), new Vector2(0, -18), new Vector2(850, 115));
-        heading = UIBuilder.CreateText(panel.transform, "Heading", "", 22, TextAnchor.UpperLeft, new Color(.45f, .9f, .7f), false);
+        heading = UIBuilder.CreateText(panel.transform, "Heading", "", 22, TextAnchor.UpperLeft, UIBuilder.Accent, false);
+        heading.fontStyle = FontStyle.Bold;
         UIBuilder.Place(heading.rectTransform, new Vector2(0, 1), new Vector2(22, -10), new Vector2(806, 30));
         instruction = UIBuilder.CreateText(panel.transform, "Instruction", "", 24, TextAnchor.UpperLeft, Color.white, false);
         UIBuilder.Place(instruction.rectTransform, new Vector2(0, 1), new Vector2(22, -44), new Vector2(806, 65));
@@ -37,6 +38,7 @@ public sealed class TutorialGuide : MonoBehaviour
             if (inventory == null) return;
             player = inventory.GetComponent<PlayerState>();
             startPosition = inventory.transform.position;
+            inventory.Merged += OnMerged;
             initialized = true;
         }
         moved |= Vector3.Distance(startPosition, inventory.transform.position) >= 1f;
@@ -58,6 +60,9 @@ public sealed class TutorialGuide : MonoBehaviour
             Show("01 / MOVE", "Use WASD or arrow keys to leave the safe house.\nYour goal: collect valuables, then return to bank them.");
         else if (!collected)
             Show("02 / COLLECT", "Walk near a collectible until E appears, then press E.\nLoot has both value and weight.");
+        // Teach merging when it is one pickup away; stop after the player has merged once.
+        else if (!mergedOnce && inventory.FindAlmostCompleteSet() is ItemData almost)
+            Show("MERGE / 2 OF 3", $"Find one more {almost.itemName}.\n3 matching items merge into one lighter, more valuable item.");
         else if (!inspected && !banked)
             Show("03 / MANAGE WEIGHT", "More weight means slower movement. Press B to inspect loot.\nQ drops the selected item; dropping is optional.");
         else if (!banked)
@@ -75,8 +80,15 @@ public sealed class TutorialGuide : MonoBehaviour
         instruction.text = body;
     }
 
+    private void OnMerged(ItemData material, ItemData result) => mergedOnce = true;
+
     private void OnDisable()
     {
         if (canvas != null) canvas.gameObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (inventory != null) inventory.Merged -= OnMerged;
     }
 }

@@ -20,3 +20,4 @@ MonoBehaviour:
     scale: 0.55
     isKey: 0
     icon: {fileID: -2413806693520163455, guid: bda828d7173ba49a78bfaa9f0797c5b0, type: 3}
+    mergeResult: {fileID: 11400000, guid: b4d2965fe56b14ec3b7dbdbc408c746e, type: 2}

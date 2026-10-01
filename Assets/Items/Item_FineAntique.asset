@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fa2b453efbb7e40c39597d47c9b50d72, type: 3}
-  m_Name: Item_Low
+  m_Name: Item_FineAntique
   m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
   data:
-    itemName: Scrap
-    weight: 2
-    value: 5
-    color: {r: 0.61960787, g: 0.61960787, b: 0.61960787, a: 1}
-    scale: 0.35
+    itemName: Fine Antique
+    weight: 9
+    value: 75
+    color: {r: 0.43529412, g: 0.7647059, b: 1, a: 1}
+    scale: 0.7
     isKey: 0
-    icon: {fileID: -2413806693520163455, guid: bda828d7173ba49a78bfaa9f0797c5b0, type: 3}
-    mergeResult: {fileID: 11400000, guid: 38a99a7d2cbd54855824f74c2563401b, type: 2}
+    icon: {fileID: 7482667652216324306, guid: 07935a5a0308a4ae692c017d352f7da2, type: 3}
+    mergeResult: {fileID: 0}

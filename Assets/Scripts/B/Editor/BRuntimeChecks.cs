@@ -65,7 +65,7 @@ public static class BRuntimeChecks
                     Require(items>=29&&items<=30,"29 loot items and at most one key spawned");
                     var canvas=UnityEngine.Object.FindFirstObjectByType<RoundScreens>().GetComponentInChildren<Canvas>(true);
                     Require(canvas.sortingOrder>20,"Start/end canvas above backpack");
-                    Require(UnityEngine.Object.FindObjectsByType<Text>(FindObjectsSortMode.None).AnyText("SELECT A LEVEL"),"Level selection visible");
+                    Require(UnityEngine.Object.FindObjectsByType<Text>(FindObjectsSortMode.None).AnyText("be inside the safe house when time runs out"),"Goal visible on start screen");
                     var buttons=canvas.GetComponentsInChildren<Button>();
                     Require(buttons.Length==1 && buttons[0].name=="StartTutorial","Only Tutorial is playable; future levels have no buttons");
                     Require(canvas.GetComponent<GraphicRaycaster>()!=null && UnityEngine.EventSystems.EventSystem.current!=null,"Menu has pointer input routing");

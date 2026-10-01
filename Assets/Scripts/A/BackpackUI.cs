@@ -16,18 +16,19 @@ public class BackpackUI : MonoBehaviour
 
     private const float RowHeight = 62f;
     private const float ListWidth = 720f;
-    private static readonly Color RowColor = new Color(0.15f, 0.17f, 0.23f);
-    private static readonly Color SelectedColor = new Color(0.23f, 0.27f, 0.39f);
-    private static readonly Color Muted = new Color(1f, 1f, 1f, 0.55f);
-    private static readonly Color Gold = new Color(1f, 0.83f, 0.3f);
+    // 行底色要不透明，否则选中时底层的青绿色描边会透出来。
+    private static readonly Color RowColor = new Color(0.085f, 0.105f, 0.135f);
+    private static readonly Color SelectedColor = new Color(0.14f, 0.165f, 0.2f);
+    private static readonly Color Muted = UIBuilder.LabelColor;
+    private static readonly Color Gold = UIBuilder.Gold;
 
     public static bool IsOpen { get; private set; }
 
     private class Row
     {
         public GameObject root;
-        public Image background, accent, icon;
-        public Text name, value, weight;
+        public Image outline, background, icon, mergeChip;
+        public Text name, value, weight, mergeText;
     }
 
     private readonly List<Row> rows = new List<Row>();
@@ -136,7 +137,8 @@ public class BackpackUI : MonoBehaviour
         IReadOnlyList<ItemData> items = inventory.Items;
         int count = items.Count;
 
-        summaryText.text = $"Weight {inventory.TotalWeight:0.#} / {inventory.Capacity:0.#}      Value ${inventory.TotalValue}";
+        summaryText.text = $"Load  <b><color=#FFFFFF>{inventory.TotalWeight:0.#} / {inventory.Capacity:0.#}</color></b>" +
+                           $"        Value  <b><color=#FFD34D>${inventory.TotalValue}</color></b>";
         emptyText.gameObject.SetActive(count == 0);
 
         // 保证选中行在可见范围内。
@@ -156,7 +158,7 @@ public class BackpackUI : MonoBehaviour
             ItemData item = items[index];
             bool isSelected = index == selected;
             row.background.color = isSelected ? SelectedColor : RowColor;
-            row.accent.enabled = isSelected;
+            row.outline.enabled = isSelected;
 
             // 图标大小跟着物品大小变，一眼能看出轻重。
             float iconSize = Mathf.Lerp(22f, 44f, Mathf.InverseLerp(0.3f, 0.85f, item.scale));
@@ -167,6 +169,12 @@ public class BackpackUI : MonoBehaviour
             row.name.text = item.itemName;
             row.value.text = $"${item.value}";
             row.weight.text = item.weight.ToString("0.#");
+
+            // 可合成的物品显示进度小标签，例如 "2/3"。
+            bool mergeable = PlayerInventory.CanMerge(item);
+            row.mergeChip.gameObject.SetActive(mergeable);
+            if (mergeable)
+                row.mergeText.text = $"{inventory.CountMatching(item)}/{PlayerInventory.MergeCount}";
         }
 
         rangeText.text = count > visibleRows
@@ -179,23 +187,24 @@ public class BackpackUI : MonoBehaviour
         Canvas canvas = UIBuilder.CreateScreenCanvas("Backpack Canvas", transform, 20);
         page = canvas.gameObject;
 
-        Image dim = UIBuilder.CreateImage(canvas.transform, "Dim", new Color(0f, 0f, 0f, 0.45f));
+        Image dim = UIBuilder.CreateImage(canvas.transform, "Dim", new Color(0f, 0f, 0f, 0.5f));
         UIBuilder.Stretch(dim.rectTransform);
 
         float listHeight = visibleRows * RowHeight;
-        Image panel = UIBuilder.CreateImage(canvas.transform, "Panel", new Color(0.1f, 0.11f, 0.15f, 0.97f));
+        Image panel = UIBuilder.CreatePanel(canvas.transform, "Panel", UIBuilder.PanelSolid, 20f);
         UIBuilder.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(ListWidth + 60f, listHeight + 230f));
         Transform p = panel.transform;
 
         Text title = UIBuilder.CreateText(p, "Title", "BACKPACK", 40, TextAnchor.UpperLeft, Color.white);
+        title.fontStyle = FontStyle.Bold;
         UIBuilder.Place(title.rectTransform, new Vector2(0f, 1f), new Vector2(36f, -24f), new Vector2(360f, 52f));
 
-        summaryText = UIBuilder.CreateText(p, "Summary", "", 26, TextAnchor.UpperRight, Muted);
-        UIBuilder.Place(summaryText.rectTransform, new Vector2(1f, 1f), new Vector2(-36f, -36f), new Vector2(460f, 40f));
+        summaryText = UIBuilder.CreateText(p, "Summary", "", 24, TextAnchor.UpperRight, UIBuilder.SoftText, false);
+        UIBuilder.Place(summaryText.rectTransform, new Vector2(1f, 1f), new Vector2(-36f, -38f), new Vector2(460f, 40f));
 
-        Header(p, "Item", TextAnchor.UpperLeft, new Vector2(0f, 1f), new Vector2(114f, -92f));
-        Header(p, "Value", TextAnchor.UpperRight, new Vector2(1f, 1f), new Vector2(-200f, -92f));
-        Header(p, "Weight", TextAnchor.UpperRight, new Vector2(1f, 1f), new Vector2(-54f, -92f));
+        Header(p, "ITEM", TextAnchor.UpperLeft, new Vector2(0f, 1f), new Vector2(114f, -94f));
+        Header(p, "VALUE", TextAnchor.UpperRight, new Vector2(1f, 1f), new Vector2(-200f, -94f));
+        Header(p, "WEIGHT", TextAnchor.UpperRight, new Vector2(1f, 1f), new Vector2(-54f, -94f));
 
         RectTransform list = UIBuilder.CreateRect("List", p);
         UIBuilder.Place(list, new Vector2(0.5f, 1f), new Vector2(0f, -130f), new Vector2(ListWidth, listHeight));
@@ -207,13 +216,15 @@ public class BackpackUI : MonoBehaviour
         rangeText = UIBuilder.CreateText(p, "Range", "", 20, TextAnchor.MiddleCenter, Muted, false);
         UIBuilder.Place(rangeText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 64f), new Vector2(300f, 26f));
 
-        Text footer = UIBuilder.CreateText(p, "Footer", "[Up/Down] Select      [Q] Drop      [B] Close", 24, TextAnchor.MiddleCenter, Muted, false);
+        const string key = "<b><color=#FFFFFF>{0}</color></b>";
+        string footerText = string.Format(key, "[Up/Down]") + " Select        " + string.Format(key, "[Q]") + " Drop        " + string.Format(key, "[B]") + " Close";
+        Text footer = UIBuilder.CreateText(p, "Footer", footerText, 22, TextAnchor.MiddleCenter, UIBuilder.SoftText, false);
         UIBuilder.Place(footer.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 22f), new Vector2(ListWidth, 36f));
     }
 
     private static void Header(Transform parent, string label, TextAnchor alignment, Vector2 corner, Vector2 position)
     {
-        Text text = UIBuilder.CreateText(parent, label, label, 22, alignment, Muted, false);
+        Text text = UIBuilder.CreateLabel(parent, label, label, alignment);
         UIBuilder.Place(text.rectTransform, corner, position, new Vector2(200f, 30f));
     }
 
@@ -221,23 +232,36 @@ public class BackpackUI : MonoBehaviour
     {
         var row = new Row();
 
-        Image background = UIBuilder.CreateImage(list, $"Row {index}", RowColor);
-        UIBuilder.Place(background.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -index * RowHeight), new Vector2(ListWidth, RowHeight - 6f));
-        row.root = background.gameObject;
-        row.background = background;
-        Transform r = background.transform;
+        // 一行 = 选中时显示的青绿色描边（底层）+ 圆角底板（上层），描边比底板大 2 像素。
+        RectTransform slot = UIBuilder.CreateRect($"Row {index}", list);
+        UIBuilder.Place(slot, new Vector2(0.5f, 1f), new Vector2(0f, -index * RowHeight), new Vector2(ListWidth, RowHeight - 6f));
+        row.root = slot.gameObject;
 
-        row.accent = UIBuilder.CreateImage(r, "Accent", Gold);
-        UIBuilder.Place(row.accent.rectTransform, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(6f, RowHeight - 6f));
+        row.outline = UIBuilder.CreatePanel(slot, "Outline", UIBuilder.Accent, 12f);
+        UIBuilder.Stretch(row.outline.rectTransform);
+        row.outline.rectTransform.offsetMin = new Vector2(-2f, -2f);
+        row.outline.rectTransform.offsetMax = new Vector2(2f, 2f);
+
+        row.background = UIBuilder.CreatePanel(slot, "Background", RowColor, 10f);
+        UIBuilder.Stretch(row.background.rectTransform);
+        Transform r = slot;
 
         row.icon = UIBuilder.CreateImage(r, "Icon", Color.white);
         row.icon.preserveAspect = true;
         UIBuilder.Place(row.icon.rectTransform, new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(40f, 40f));
 
         row.name = UIBuilder.CreateText(r, "Name", "", 28, TextAnchor.MiddleLeft, Color.white, false);
-        UIBuilder.Place(row.name.rectTransform, new Vector2(0f, 0.5f), new Vector2(84f, 0f), new Vector2(360f, 40f));
+        UIBuilder.Place(row.name.rectTransform, new Vector2(0f, 0.5f), new Vector2(84f, 0f), new Vector2(210f, 40f));
+
+        // 合成进度小标签，例如 "2/3"。
+        row.mergeChip = UIBuilder.CreatePanel(r, "Merge Chip", UIBuilder.Accent, 14f);
+        UIBuilder.Place(row.mergeChip.rectTransform, new Vector2(0f, 0.5f), new Vector2(300f, 0f), new Vector2(64f, 28f));
+        row.mergeText = UIBuilder.CreateText(row.mergeChip.transform, "Text", "", 18, TextAnchor.MiddleCenter, UIBuilder.DarkText, false);
+        row.mergeText.fontStyle = FontStyle.Bold;
+        UIBuilder.Stretch(row.mergeText.rectTransform);
 
         row.value = UIBuilder.CreateText(r, "Value", "", 28, TextAnchor.MiddleRight, Gold, false);
+        row.value.fontStyle = FontStyle.Bold;
         UIBuilder.Place(row.value.rectTransform, new Vector2(1f, 0.5f), new Vector2(-170f, 0f), new Vector2(140f, 40f));
 
         row.weight = UIBuilder.CreateText(r, "Weight", "", 28, TextAnchor.MiddleRight, Color.white, false);

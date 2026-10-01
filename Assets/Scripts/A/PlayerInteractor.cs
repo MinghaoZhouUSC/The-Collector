@@ -104,14 +104,20 @@ public class PlayerInteractor : MonoBehaviour
         var background = new GameObject("Background", typeof(RectTransform), typeof(Image));
         background.transform.SetParent(root.transform, false);
         Stretch((RectTransform)background.transform);
-        background.GetComponent<Image>().color = promptBackground;
+        var backgroundImage = background.GetComponent<Image>();
+        backgroundImage.color = promptBackground;
+        // 圆角键帽样式。
+        backgroundImage.sprite = UIBuilder.RoundedSprite;
+        backgroundImage.type = Image.Type.Sliced;
+        UIBuilder.SetRadius(backgroundImage, 8f);
 
         var label = new GameObject("Label", typeof(RectTransform), typeof(Text));
         label.transform.SetParent(root.transform, false);
         Stretch((RectTransform)label.transform);
         var text = label.GetComponent<Text>();
         text.text = "E";
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.font = UIBuilder.DefaultFont;
+        text.fontStyle = FontStyle.Bold;
         text.fontSize = 26;
         text.alignment = TextAnchor.MiddleCenter;
         text.color = promptTextColor;

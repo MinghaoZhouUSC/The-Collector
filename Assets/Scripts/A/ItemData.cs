@@ -13,6 +13,8 @@ public class ItemData
     public bool isKey;
     [Tooltip("物品图片（Unity 自带形状），地上和背包页面共用。为空时使用 WorldItem Prefab 自己的图片")]
     public Sprite icon;
+    [Tooltip("集齐 3 件这种物品时自动合成为哪种物品。为空表示不能合成")]
+    public ItemDefinition mergeResult;
 
     // 返回一份副本。运行时只使用副本，避免在 Play 模式下误改 ItemDefinition 资源里的数值。
     public ItemData Clone() => (ItemData)MemberwiseClone();
