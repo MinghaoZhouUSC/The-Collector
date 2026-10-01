@@ -469,7 +469,7 @@ MonoBehaviour:
   - {fileID: 430076140168523896}
   - {fileID: 821232028889864776}
   - {fileID: 9085880967349564137}
-  lockedMessage: Locked - need a key
+  lockedMessage: Vault locked - find a key to open it
 --- !u!1 &3679204701132354366
 GameObject:
   m_ObjectHideFlags: 0
