@@ -258,6 +258,8 @@ public static class BProjectTools
         Directory.CreateDirectory("docs");
         var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions {
             scenes=new[]{Main}, locationPathName="docs", target=BuildTarget.WebGL, options=BuildOptions.None });
+        // Temp is recreated by Unity; menu builds may run without automation enabled.
+        Directory.CreateDirectory(Control);
         File.WriteAllText(Path.Combine(Control,"build.txt"),report.summary.result+"\nbytes="+report.summary.totalSize+"\nseconds="+report.summary.totalTime.TotalSeconds+"\nerrors="+report.summary.totalErrors);
         if(report.summary.result!=BuildResult.Succeeded)throw new Exception("WebGL build failed: "+report.summary.result);
         File.WriteAllText("docs/.nojekyll","");
