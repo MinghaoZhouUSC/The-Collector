@@ -55,7 +55,7 @@ public class RoundManager : MonoBehaviour
         switch (State)
         {
             case RoundState.Ready:
-                if (Pressed(kb, startKey)) SetState(RoundState.Playing);
+                if (Pressed(kb, startKey)) StartRound();
                 break;
 
             case RoundState.Playing:
@@ -68,6 +68,17 @@ public class RoundManager : MonoBehaviour
                 if (Pressed(kb, restartKey)) Restart();
                 break;
         }
+    }
+
+    // Shared by the keyboard shortcut and the level-selection button.
+    public void StartRound()
+    {
+        if (State == RoundState.Ready) SetState(RoundState.Playing);
+    }
+
+    public void ReturnToLevelSelect()
+    {
+        if (State == RoundState.Ended) Restart();
     }
 
     private void TryExtractEarly()

@@ -15,7 +15,7 @@ WASD/arrows move; E collects or unlocks the vault; B opens/closes the backpack; 
 - RoundScreens creates English Legacy Text UI above HUD/backpack at Canvas sorting order 30. RoundManager remains responsible for input and outcomes.
 - Four B prefabs, Main and B_Test, 29 loot spawn points, three possible key locations, four traps, and four three-unit doorways.
 
-A's scripts, prefabs, item definitions and A_Test are unchanged. Only the agreed PlayerState extension changes shared gameplay code.
+A's prefabs, item definitions and A_Test are unchanged. Shared integration includes the PlayerState Freeze extension and guarded RoundManager methods used by the level-selection buttons.
 
 ## Balance
 
@@ -40,3 +40,9 @@ The Play Mode integration checks exercise actual trigger callbacks, A/B interfac
 `Tools > The Collector > Build WebGL` builds Main into `docs/`, with the default Unity template and disabled compression, then creates `.nojekyll`. Host the directory over HTTP/HTTPS, not by opening index.html as a local file. GitHub Pages should use main /docs.
 
 AI-assisted implementation and testing must be disclosed in the course submission in accordance with the team's approved usage. This repository note is a technical handoff, not a claim of course approval or a replacement for the descriptive document/video.
+
+## Level selection and Tutorial
+
+Main now opens a level-selection screen. Click Play Tutorial or press Space to enter the existing map; Level 1, 2 and 3 are visibly unavailable placeholders. The round still lasts 120 seconds and requires $500 banked and a safe extraction. After a result, the menu button or R reloads the map and returns to selection.
+
+TutorialGuide observes movement, collection, backpack use and deposits, and displays contextual instructions without pausing the timer. It also explains traps, the optional vault and the return deadline. RoundScreens adds it at runtime, so existing Main/B_Test scene assets need no edits. RoundManager exposes guarded StartRound and ReturnToLevelSelect methods for menu buttons.

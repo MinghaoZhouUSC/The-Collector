@@ -55,6 +55,7 @@ public class DebugHUD : MonoBehaviour
 
     private void OnGUI()
     {
+        if (RoundManager.Instance != null && RoundManager.Instance.State != RoundManager.RoundState.Playing) return;
         if (style == null)
         {
             style = new GUIStyle(GUI.skin.box)
